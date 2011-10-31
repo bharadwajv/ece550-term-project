@@ -1,0 +1,10 @@
+Create Y bus
+Read the data from the load bus data and create the ybus
+Generate a output file with the ybus alone 
+Check with power flow
+Newton Raphson method
+Do nodal analysis
+
+find the current injections
+use the y bus file to start the problem
+generate the output file
