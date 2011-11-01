@@ -1,0 +1,198 @@
+clear all
+clc
+global delp delq
+YBUS;
+v=vsp.';
+del=Dsp.';
+
+p=zeros(1,n);
+q=zeros(1,n);
+pc=zeros(1,n);
+qc=zeros(1,n);
+pq=zeros(1,n);
+pv=zeros(1,n);
+delp=zeros(1,n-1);
+delq=zeros(1,n-1);
+pv=(find(bus(:,9)))';
+for i=1:n
+    if ~bus(:,9)
+        pq=(find(bus(:,7)))';
+    end
+end
+for i=1:length(pv)
+    p(pv(i))=bus(pv(i),9)-bus(pv(i),7);
+end
+for i=1:length(pq)
+    p(pq(i))=-bus(pq(i),7);
+    q(pq(i))=-bus(pq(i),8);
+end
+for y=1:n
+            sigmap=v(bus)*v(y)*abs(ybus(bus,y))*cos(angle(ybus(bus,y))+del(y)-del(bus));
+            pc(bus)=pc(bus)+sigmap;
+end
+
+        for y=1:n
+            sigmap=v(bus)*v(y)*abs(ybus(bus,y))*cos(angle(ybus(bus,y))+del(y)-del(bus));
+            sigmaq=-v(bus)*v(y)*abs(ybus(bus,y))*sin(angle(ybus(bus,y))+del(y)-del(bus));
+            pc(bus)=pc(bus)+sigmap;
+            qc(bus)=qc(bus)+sigmaq;
+        end
+% pq=nonzeros(pq)';
+% pv=nonzeros(pv)';
+for x=1:length(pv(1,:))
+    delp(pv(x))=p(pv(x))-pc(pv(x));
+end
+for x=1:length(pq(1,:))
+    delp(pq(x))=p(pq(x))-pc(pq(x));
+    delq(pq(x))=q(pq(x))-qc(pq(x));
+end
+%j=input('\n Input jacobian matrix \n');
+lhs=zeros(1,length(pv)+2*length(pq));
+ddel=zeros(1,length(del));
+delv=zeros(1,length(v));
+for x=1:length(pv)
+    lhs(x)=delp(pv(x));
+end
+for x=1:length(pq)
+    lhs(length(pv)+x)=delp(pq(x));
+end
+for x=1:length(pq)
+    lhs(length(pv)+length(pq)+x)=delq(pq(x));
+end
+
+
+d_sym=sym('d',[1,n]);
+v_sym=sym('v',[1,n]);
+p_sym=sym('p',[1,n]);
+q_sym=sym('q',[1,n]);
+for x=1:length(pq)
+        for y=1:n
+            sigp(y)=v_sym(pq(x))*v_sym(y)*abs(ybus(pq(x),y))*cos(angle(ybus(pq(x),y))+d_sym(y)-d_sym(pq(x)));
+            sigq(y)=-v_sym(pq(x))*v_sym(y)*abs(ybus(pq(x),y))*sin(angle(ybus(pq(x),y))+d_sym(y)-d_sym(pq(x)));
+            
+        end
+        pc_sym(pq(x))=sum(sigp);
+        qc_sym(pq(x))=sum(sigq);
+end
+syms temp temp_1
+for i=1:length(pv)
+    temp=[pc_sym(pv(i))];
+end
+for i=1:length(pq)
+    temp=[pc_sym(pq(i));qc_sym(pq(i))];
+end
+
+for i=1:length(pv)
+    temp_1=[d_sym(pv(i))];
+end
+for i=1:length(pq)
+    temp_1=[d_sym(pq(i)),v_sym(pq(i))];
+end
+f=jacobian(temp,temp_1);
+h=subs(f,[v_sym,d_sym],[v,del]);
+output=inv(h)*lhs';    
+i=0;
+fprintf('\n ITERATION %d',i);
+fprintf('\n Pcalculated \n');
+disp(pc);
+fprintf('\n Qcalculated \n');
+disp(qc);
+fprintf('\n delp \n');
+disp(delp);
+fprintf('\n delq \n');
+disp(delq);
+fprintf('\n lhs \n');
+disp(lhs);
+fprintf('\n output \n');
+disp(output);
+for x=1:length(pv)
+    ddel(pv(x))=output(x);
+end
+for x=1:length(pq)
+    ddel(pq(x))=output(length(pv)+x);
+end
+for x=1:length(pq)
+    delv(pq(x))=output(length(pv)+length(pq)+x);
+end
+for x=1:n
+    del(x)=del(x)+ddel(x);
+    v(x)=v(x)+delv(x);
+end
+fprintf('\n del \n');
+disp(del);
+fprintf('\n v \n');
+disp(v);
+i=i+1;
+e=1;
+% while e>0.01
+%     pc=zeros(1,n);
+% qc=zeros(1,n);
+% delp=zeros(1,n-1);
+% delq=zeros(1,n-1);
+% for x=1:length(pv)
+%         for y=1:n
+%             sigmap=v(pv(x))*v(y)*abs(ybus(pv(x),y))*cos(angle(ybus(pv(x),y))+del(y)-del(pv(x)));
+%             pc(pv(x))=pc(pv(x))+sigmap;
+%         end
+%     end
+%     for x=1:length(pq)
+%         for y=1:n
+%             sigmap=v(pq(x))*v(y)*abs(ybus(pq(x),y))*cos(angle(ybus(pq(x),y))+del(y)-del(pq(x)));
+%             sigmaq=-v(pq(x))*v(y)*abs(ybus(pq(x),y))*sin(angle(ybus(pq(x),y))+del(y)-del(pq(x)));
+%             pc(pq(x))=pc(pq(x))+sigmap;
+%             qc(pq(x))=qc(pq(x))+sigmaq;
+%         end
+%     end
+%     for x=1:length(pv)
+%     delp(pv(x))=p(pv(x))-pc(pv(x));
+% end
+% for x=1:length(pq)
+%     delp(pq(x))=p(pq(x))-pc(pq(x));
+%     delq(pq(x))=q(pq(x))-qc(pq(x));
+% end
+% %j=input('\n Input jacobian matrix \n');
+%  lhs=zeros(1,length(pv)+2*length(pq));
+% for x=1:length(pv)
+%     lhs(x)=delp(pv(x));
+% end
+% for x=1:length(pq)
+%     lhs(length(pv)+x)=delp(pq(x));
+% end
+% for x=1:length(pq)
+%     lhs(length(pv)+length(pq)+x)=delq(pq(x));
+% end
+% 
+% output=inv(j)*lhs';
+% fprintf('\n ITERATION %d',i);
+% fprintf('\n Pcalculated \n');
+% disp(pc);
+% fprintf('\n Qcalculated \n');
+% disp(qc);
+% fprintf('\n delp \n');
+% disp(delp);
+% fprintf('\n delq \n');
+% disp(delq);
+% fprintf('\n lhs \n');
+% disp(lhs);
+% fprintf('\n output \n');
+% disp(output);
+% for x=1:length(pv)
+%     ddel(pv(x))=output(x);
+% end
+% for x=1:length(pq)
+%     ddel(pq(x))=output(length(pv)+x);
+% end
+% for x=1:length(pq)
+%     delv(pq(x))=output(length(pv)+length(pq)+x);
+% end
+% for x=1:n
+%     del(x)=del(x)+ddel(x);
+%     v(x)=v(x)+delv(x);
+% end
+% fprintf('\n del \n');
+% disp(del);
+% fprintf('\n v \n');
+% disp(v);
+% i=i+1;
+% e=max(delp,delq);
+% end
