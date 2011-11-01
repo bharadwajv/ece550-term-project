@@ -14,21 +14,24 @@ pv=zeros(1,n);
 delp=zeros(1,n-1);
 delq=zeros(1,n-1);
 pv=(find(bus(:,9)))';
-for i=1:n
-    if ~bus(:,9)
-        pq=(find(bus(:,7)))';
+
+for i=1:length(bus(:,1))
+    if bus(i,9)==0
+        pq(i)=i;
     end
 end
+pq=nonzeros(pq);
+pq=pq';
 for i=1:length(pv)
-    p(pv(i))=bus(pv(i),9)-bus(pv(i),7);
+    p(pv(i))=(bus(pv(i),9)-bus(pv(i),7))/Sb;
     for y=1:n
             sigmap=v(pv(i))*v(y)*abs(ybus(pv(i),y))*cos(angle(ybus(pv(i),y))+del(y)-del((pv(i))));
             pc(pv(i))=pc(pv(i))+sigmap;
     end
 end
 for i=1:length(pq)
-    p(pq(i))=-bus(pq(i),7);
-    q(pq(i))=-bus(pq(i),8);
+    p(pq(i))=-bus(pq(i),7)/Sb;
+    q(pq(i))=-bus(pq(i),8)/Sb;
     for y=1:n
             sigmap=v(pq(i))*v(y)*abs(ybus(pq(i),y))*cos(angle(ybus(pq(i),y))+del(y)-del(pq(i)));
             sigmaq=-v(pq(i))*v(y)*abs(ybus(pq(i),y))*sin(angle(ybus(pq(i),y))+del(y)-del(pq(i)));
@@ -75,6 +78,15 @@ d_sym=sym('d',[1,n]);
 v_sym=sym('v',[1,n]);
 p_sym=sym('p',[1,n]);
 q_sym=sym('q',[1,n]);
+
+for x=1:length(pv)
+        for y=1:n
+            sigp(y)=v_sym(pv(x))*v_sym(y)*abs(ybus(pv(x),y))*cos(angle(ybus(pv(x),y))+d_sym(y)-d_sym(pv(x)));
+        end
+        pc_sym(pv(x))=sum(sigp);
+        
+end
+
 for x=1:length(pq)
         for y=1:n
             sigp(y)=v_sym(pq(x))*v_sym(y)*abs(ybus(pq(x),y))*cos(angle(ybus(pq(x),y))+d_sym(y)-d_sym(pq(x)));
@@ -84,23 +96,30 @@ for x=1:length(pq)
         pc_sym(pq(x))=sum(sigp);
         qc_sym(pq(x))=sum(sigq);
 end
-syms temp temp_1
+
+syms temp temp_1 temp_2 temp_3
 for i=1:length(pv)
-    temp=[pc_sym(pv(i))];
+    temp(i)=pc_sym(pv(i));
 end
 for i=1:length(pq)
-    temp=[pc_sym(pq(i));qc_sym(pq(i))];
+    temp(length(pv)+i)=pc_sym(pq(i));
 end
+for i=1:length(pq)
+    temp(length(pv)+length(pq)+i)=qc_sym(pq(i));
+end
+temp=temp';
 
 for i=1:length(pv)
-    temp_1=[d_sym(pv(i))];
+    temp_1(i)=[d_sym(pv(i))];
 end
 for i=1:length(pq)
-    temp_1=[d_sym(pq(i)),v_sym(pq(i))];
+    temp_2(i)=d_sym(pq(i));
+    temp_3(i)=v_sym(pq(i));
 end
+temp_1=[temp_1,temp_2,temp_3];
 f=jacobian(temp,temp_1);
 h=subs(f,[v_sym,d_sym],[v,del]);
-output=inv(h)*lhs';    
+output=inv(h)*(lhs');    
 i=0;
 fprintf('\n ITERATION %d',i);
 fprintf('\n Pcalculated \n');
@@ -136,8 +155,8 @@ fprintf('\n del \n');
 disp(del);
 fprintf('\n v \n');
 disp(v);
-i=i+1;
-e=1;
+%i=i+1;
+
 % while e>0.01
 %     pc=zeros(1,n);
 % qc=zeros(1,n);
@@ -210,3 +229,6 @@ e=1;
 % i=i+1;
 % e=max(delp,delq);
 % end
+    
+
+
