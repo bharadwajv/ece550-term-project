@@ -124,11 +124,11 @@ end
 for x=1:length(pq)
     delv(pq(x))=output(length(pv)+length(pq)+x);
 end
-for x=1:length(pv(x))
+for x=1:length(pv)
     del(pv(x))=del(pv(x))+ddel(pv(x));
     %v(x)=v(x)+delv(x);
 end
-for x=1:length(pq(x))
+for x=1:length(pq)
     del(pq(x))=del(pq(x))+ddel(pq(x));
     v(pq(x))=v(pq(x))+delv(pq(x));
 end
