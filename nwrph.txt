@@ -16,7 +16,7 @@ delq=zeros(1,n-1);
 pv=(find(bus(:,9)))';
 
 for i=1:length(bus(:,1))
-    if bus(i,9)==0
+    if bus(i,9)==0 && bus(i,1)>1
         pq(i)=i;
     end
 end
@@ -107,7 +107,7 @@ end
 for i=1:length(pq)
     temp(length(pv)+length(pq)+i)=qc_sym(pq(i));
 end
-temp=temp';
+temp=temp.';
 
 for i=1:length(pv)
     temp_1(i)=[d_sym(pv(i))];
