@@ -21,22 +21,32 @@ for i=1:n
 end
 for i=1:length(pv)
     p(pv(i))=bus(pv(i),9)-bus(pv(i),7);
+    for y=1:n
+            sigmap=v(pv(i))*v(y)*abs(ybus(pv(i),y))*cos(angle(ybus(pv(i),y))+del(y)-del((pv(i))));
+            pc(pv(i))=pc(pv(i))+sigmap;
+    end
 end
 for i=1:length(pq)
     p(pq(i))=-bus(pq(i),7);
     q(pq(i))=-bus(pq(i),8);
+    for y=1:n
+            sigmap=v(pq(i))*v(y)*abs(ybus(pq(i),y))*cos(angle(ybus(pq(i),y))+del(y)-del(pq(i)));
+            sigmaq=-v(pq(i))*v(y)*abs(ybus(pq(i),y))*sin(angle(ybus(pq(i),y))+del(y)-del(pq(i)));
+            pc(pq(i))=pc(pq(i))+sigmap;
+            qc(pq(i))=qc(pq(i))+sigmaq;
+    end
 end
-for y=1:n
-            sigmap=v(bus)*v(y)*abs(ybus(bus,y))*cos(angle(ybus(bus,y))+del(y)-del(bus));
-            pc(bus)=pc(bus)+sigmap;
-end
+% for y=1:n
+%             sigmap=v(bus)*v(y)*abs(ybus(bus,y))*cos(angle(ybus(bus,y))+del(y)-del(bus));
+%             pc(bus)=pc(bus)+sigmap;
+% end
 
-        for y=1:n
-            sigmap=v(bus)*v(y)*abs(ybus(bus,y))*cos(angle(ybus(bus,y))+del(y)-del(bus));
-            sigmaq=-v(bus)*v(y)*abs(ybus(bus,y))*sin(angle(ybus(bus,y))+del(y)-del(bus));
-            pc(bus)=pc(bus)+sigmap;
-            qc(bus)=qc(bus)+sigmaq;
-        end
+%         for y=1:n
+%             sigmap=v(bus)*v(y)*abs(ybus(bus,y))*cos(angle(ybus(bus,y))+del(y)-del(bus));
+%             sigmaq=-v(bus)*v(y)*abs(ybus(bus,y))*sin(angle(ybus(bus,y))+del(y)-del(bus));
+%             pc(bus)=pc(bus)+sigmap;
+%             qc(bus)=qc(bus)+sigmaq;
+%         end
 % pq=nonzeros(pq)';
 % pv=nonzeros(pv)';
 for x=1:length(pv(1,:))
@@ -114,9 +124,13 @@ end
 for x=1:length(pq)
     delv(pq(x))=output(length(pv)+length(pq)+x);
 end
-for x=1:n
-    del(x)=del(x)+ddel(x);
-    v(x)=v(x)+delv(x);
+for x=1:length(pv(x))
+    del(pv(x))=del(pv(x))+ddel(pv(x));
+    %v(x)=v(x)+delv(x);
+end
+for x=1:length(pq(x))
+    del(pq(x))=del(pq(x))+ddel(pq(x));
+    v(pq(x))=v(pq(x))+delv(pq(x));
 end
 fprintf('\n del \n');
 disp(del);
