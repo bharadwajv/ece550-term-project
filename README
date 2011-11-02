@@ -1,4 +1,16 @@
+
+% nodal analysis%
 Create Y bus
+Find Gen Bus
+FindIg for Gen bus
+find Il for load bus
+take contingency
+create new ybus
+perform nodal analysis.
+output the voltages and angles
+
+
+
 Read the data from the load bus data and create the ybus
 Generate a output file with the ybus alone 
 Check with power flow
