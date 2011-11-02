@@ -6,8 +6,8 @@ YBUS;
 zs=0.05j;
 v=vsp;
 del=Dsp;
-delp=zeros(1,n-1);
-delq=zeros(1,n-1);
+% delp=zeros(1,n-1);
+% delq=zeros(1,n-1);
 ybusn=ybus;
 %indicing the PV and PQ buses%
 for i=1:length(bus(:,1))
@@ -16,7 +16,7 @@ for i=1:length(bus(:,1))
     end
 end
 for i=1:length(bus(:,1))
-    if bus(i,9)==0 
+    if ~bus(i,9)
         pq(i)=i;
     end
 end
@@ -32,20 +32,53 @@ Sg=zeros(length(bus(:,1)),1);
 Sl=zeros(length(bus(:,1)),1);
 Ig=zeros(length(bus(:,1)),1);
 Il=zeros(length(bus(:,1)),1);
+Ef=zeros(length(bus(:,1)),1);
+I=zeros(length(bus(:,1)),1);
+
 
 %Genreator voltage intitiation%
-pg=bus(:,9)/Sb;
-qg=bus(:,10)/Sb;
-pl=bus(:,7)/Sb;
-ql=bus(:,8)/Sb;
+% pg=bus(:,9)/Sb;
+% qg=bus(:,10)/Sb;
 
+pg=zeros(length(bus(:,1)),1);
+qg=zeros(length(bus(:,1)),1);
+% pl=zeros(length(bus(:,1)),1);
+% ql=zeros(length(bus(:,1)),1);
 
-for i=1:length(pv)
-    Sg(pv(i))=abs(pg(pv(i))+qg(pv(i))*1i);
-end
-for i=1:length(pq)
-    Sl(pq(i))=abs(pl(pq(i))+ql(pq(i))*1i);
-end
+ pl=bus(:,7)/Sb;
+ ql=bus(:,8)/Sb;
+
+% for i=1:length(pv)
+%     p(pv(i))=(bus(pv(i),9)-bus(pv(i),7))/Sb;
+%     q(pv(i))=(bus(pv(i),10)-bus(pv(i),8))/Sb;
+% end
+% for i=1:length(pv)
+%     for y=1:n
+%             sigmap=v(pv(i))*v(y)*abs(ybus(pv(i),y))*cos(angle(ybus(pv(i),y))+del(y)-del((pv(i))));
+%             sigmaq=-v(pv(i))*v(y)*abs(ybus(pv(i),y))*sin(angle(ybus(pv(i),y))+del(y)-del(pv(i)));
+%             pg(pv(i))=pg(pv(i))+sigmap;
+%             qg(pv(i))=qg(pv(i))+sigmaq;
+%     end
+% end
+% for i=1:length(pq)
+%     p(pq(i))=-bus(pq(i),7)/Sb;
+%     q(pq(i))=-bus(pq(i),8)/Sb;
+% end
+% for i=1:length(pq)
+%     for y=1:n
+%             sigmap=v(pq(i))*v(y)*abs(ybus(pq(i),y))*cos(angle(ybus(pq(i),y))+del(y)-del(pq(i)));
+%             sigmaq=-v(pq(i))*v(y)*abs(ybus(pq(i),y))*sin(angle(ybus(pq(i),y))+del(y)-del(pq(i)));
+%             pl(pq(i))=pl(pq(i))+sigmap;
+%             ql(pq(i))=ql(pq(i))+sigmaq;
+%     end
+% end
+% 
+% for i=1:length(pv)
+%     Sg(pv(i))=abs(pg(pv(i))+qg(pv(i))*1i);
+% end
+% for i=1:length(pq)
+%     Sl(pq(i))=abs(pl(pq(i))+ql(pq(i))*1i);
+% end
 
 % %current injection calculation%
 % for i=1:length(pv)
@@ -57,7 +90,7 @@ end
 % Iinj=[nonzeros(Ig);nonzeros(Il)];
 
 %% contingency screening%%
-tot=[1];
+tot=1;
 e=1;
 ind=0;
 while tot
@@ -69,34 +102,65 @@ while tot
     ybusn(f,t)=0;
     ybusn(f,f)=ybus(f,f)-inv(r(f,t)+x(f,t)*1i)-0.5*b(f,t);
     ybusn(t,t)=ybus(t,t)-inv(r(t,f)+x(t,f)*1i)-0.5*b(t,f);
-    while e>=0.01
-    %current injection calculation%
-    for i=1:length(pv)
-        Ig(pv(i))=conj((pg(pv(i))+qg(pv(i))*1i)/v(pv(i)));
-    end
-    for i=1:length(pq)
-        Il(pq(i))=-conj((pl(pq(i))+ql(pq(i))*1i)/v(pq(i)));
-    end
-    Iinj=[nonzeros(Ig);nonzeros(Il)];
+%     while e>=0.01
+    
     
     % Nodal analysis %
-    Vnew=ybusn\Iinj;
-    e=min(v-abs(Vnew));
     for i=1:length(pv)
-        v(pv(i))=abs(Vnew(i));
-        del(pv(i))=angle(Vnew(i));
+        for y=1:n
+            sigmap=v(pv(i))*v(y)*abs(ybusn(pv(i),y))*cos(angle(ybusn(pv(i),y))+del(y)-del((pv(i))));
+            sigmaq=-v(pv(i))*v(y)*abs(ybusn(pv(i),y))*sin(angle(ybusn(pv(i),y))+del(y)-del(pv(i)));
+            pg(pv(i))=pg(pv(i))+sigmap;
+            qg(pv(i))=qg(pv(i))+sigmaq;
+        end
+    end
+%     for i=1:length(pq)
+%         for y=1:n
+%             sigmap=v(pq(i))*v(y)*abs(ybusn(pq(i),y))*cos(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
+%             sigmaq=-v(pq(i))*v(y)*abs(ybusn(pq(i),y))*sin(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
+%             pl(pq(i))=pl(pq(i))+sigmap;
+%             ql(pq(i))=ql(pq(i))+sigmaq;
+%         end
+%     end
+
+    for i=1:length(pv)
+        Sg(pv(i))=pg(pv(i))+qg(pv(i))*1i;
     end
     for i=1:length(pq)
-        v(pq(i))=abs(Vnew(length(pv)+i));
-        del(pq(i))=angle(Vnew(length(pv)+i));
+        Sl(pq(i))=pl(pq(i))+ql(pq(i))*1i;
     end
-    fprintf('ITERATION %f \n',ind);
-    fprintf('\n');
-    disp(v);
-    fprintf('\n');
-    disp(del);
-    ind=ind+1;
+    %current injection calculation%
+    for i=1:length(pv)
+        Ig(pv(i))=conj(Sg(pv(i))/v(pv(i)));
     end
+    for i=1:length(pv)
+        Ef(pv(i))=v(pv(i))+zs*Ig(pv(i));
+    end
+    for i=1:length(pv)
+        I(pv(i))=Ef(pv(i))/zs;
+    end
+    for i=1:length(pq)
+        Il(pq(i))=-conj(Sl(pq(i))/v(pq(i)));
+    end
+    Iinj=[nonzeros(I);nonzeros(Il)];
+    
+    Vnew=ybusn\Iinj;
+%     e=min(v-abs(Vnew));
+%     for i=1:length(pv)
+%         v(pv(i))=abs(Vnew(i));
+%         del(pv(i))=angle(Vnew(i));
+%     end
+%     for i=1:length(pq)
+%         v(pq(i))=abs(Vnew(length(pv)+i));
+%         del(pq(i))=angle(Vnew(length(pv)+i));
+%     end
+%     fprintf('ITERATION %f \n',ind);
+    fprintf('\n');
+    disp(Vnew);
+%     fprintf('\n');
+%     disp(del);
+%     ind=ind+1;
+%     end
     tot=input('\n Enter 0 to exit 1 to continue \n');
     
 end
