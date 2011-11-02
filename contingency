@@ -1,0 +1,103 @@
+%%network contingency analysis%%
+clear all;
+clc;
+%Existing State/Conditions%
+YBUS;
+zs=0.05j;
+v=vsp;
+del=Dsp;
+delp=zeros(1,n-1);
+delq=zeros(1,n-1);
+ybusn=ybus;
+%indicing the PV and PQ buses%
+for i=1:length(bus(:,1))
+    if bus(i,9) 
+       pv(i)=i;
+    end
+end
+for i=1:length(bus(:,1))
+    if bus(i,9)==0 
+        pq(i)=i;
+    end
+end
+pq=nonzeros(pq)';
+pv=nonzeros(pv)';   
+
+%ybus with the norton equivalent impendance consideration%
+for i=1:length(pv)
+    ybus(pv(i),pv(i))=ybus(pv(i),pv(i))+inv(zs);
+end
+% Req Variable definition%
+Sg=zeros(length(bus(:,1)),1);
+Sl=zeros(length(bus(:,1)),1);
+Ig=zeros(length(bus(:,1)),1);
+Il=zeros(length(bus(:,1)),1);
+
+%Genreator voltage intitiation%
+pg=bus(:,9)/Sb;
+qg=bus(:,10)/Sb;
+pl=bus(:,7)/Sb;
+ql=bus(:,8)/Sb;
+
+
+for i=1:length(pv)
+    Sg(pv(i))=abs(pg(pv(i))+qg(pv(i))*1i);
+end
+for i=1:length(pq)
+    Sl(pq(i))=abs(pl(pq(i))+ql(pq(i))*1i);
+end
+
+% %current injection calculation%
+% for i=1:length(pv)
+%     Ig(pv(i))=conj((pg(pv(i))+qg(pv(i))*1i)/v(pv(i)));
+% end
+% for i=1:length(pq)
+%     Il(pq(i))=-conj((pl(pq(i))+ql(pq(i))*1i)/v(pq(i)));
+% end
+% Iinj=[nonzeros(Ig);nonzeros(Il)];
+
+%% contingency screening%%
+tot=[1];
+e=1;
+ind=0;
+while tot
+    fprintf('\n ...Continegency Screening in progress...');
+    
+    fprintf('\n Provide the line outage Details');
+    f=input('\n From bus number\n');
+    t=input('\n To bus number\n');
+    ybusn(f,t)=0;
+    ybusn(f,f)=ybus(f,f)-inv(r(f,t)+x(f,t)*1i)-0.5*b(f,t);
+    ybusn(t,t)=ybus(t,t)-inv(r(t,f)+x(t,f)*1i)-0.5*b(t,f);
+    while e>=0.01
+    %current injection calculation%
+    for i=1:length(pv)
+        Ig(pv(i))=conj((pg(pv(i))+qg(pv(i))*1i)/v(pv(i)));
+    end
+    for i=1:length(pq)
+        Il(pq(i))=-conj((pl(pq(i))+ql(pq(i))*1i)/v(pq(i)));
+    end
+    Iinj=[nonzeros(Ig);nonzeros(Il)];
+    
+    % Nodal analysis %
+    Vnew=ybusn\Iinj;
+    e=min(v-abs(Vnew));
+    for i=1:length(pv)
+        v(pv(i))=abs(Vnew(i));
+        del(pv(i))=angle(Vnew(i));
+    end
+    for i=1:length(pq)
+        v(pq(i))=abs(Vnew(length(pv)+i));
+        del(pq(i))=angle(Vnew(length(pv)+i));
+    end
+    fprintf('ITERATION %f \n',ind);
+    fprintf('\n');
+    disp(v);
+    fprintf('\n');
+    disp(del);
+    ind=ind+1;
+    end
+    tot=input('\n Enter 0 to exit 1 to continue \n');
+    
+end
+
