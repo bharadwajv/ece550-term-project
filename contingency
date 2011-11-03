@@ -34,15 +34,17 @@ Ef=zeros(length(bus(:,1)),1);
 I=zeros(length(bus(:,1)),1);
 
 
-%Genreator voltage intitiation%
-% pg=bus(:,9)/Sb;
-% qg=bus(:,10)/Sb;
 
 pg=zeros(length(bus(:,1)),1);
 qg=zeros(length(bus(:,1)),1);
 % pl=zeros(length(bus(:,1)),1);
 % ql=zeros(length(bus(:,1)),1);
 
+%Genreator voltage intitiation%
+pg=bus(:,9)/Sb;
+qg=bus(:,10)/Sb;
+
+%Load Bus Initiation%
  pl=bus(:,7)/Sb;
  ql=bus(:,8)/Sb;
 
@@ -106,14 +108,14 @@ while tot
     
     
     % Nodal analysis %
-    for i=1:length(pv)
-        for y=1:n
-            sigmap=v(pv(i))*v(y)*abs(ybusn(pv(i),y))*cos(angle(ybusn(pv(i),y))+del(y)-del((pv(i))));
-            sigmaq=-v(pv(i))*v(y)*abs(ybusn(pv(i),y))*sin(angle(ybusn(pv(i),y))+del(y)-del(pv(i)));
-            pg(pv(i))=pg(pv(i))+sigmap;
-            qg(pv(i))=qg(pv(i))+sigmaq;
-        end
-    end
+%     for i=1:length(pv)
+%         for y=1:n
+%             sigmap=v(pv(i))*v(y)*abs(ybusn(pv(i),y))*cos(angle(ybusn(pv(i),y))+del(y)-del((pv(i))));
+%             sigmaq=-v(pv(i))*v(y)*abs(ybusn(pv(i),y))*sin(angle(ybusn(pv(i),y))+del(y)-del(pv(i)));
+%             pg(pv(i))=pg(pv(i))+sigmap;
+%             qg(pv(i))=qg(pv(i))+sigmaq;
+%         end
+%     end
 %     for i=1:length(pq)
 %         for y=1:n
 %             sigmap=v(pq(i))*v(y)*abs(ybusn(pq(i),y))*cos(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
@@ -183,3 +185,4 @@ while tot
      tot=input('\n Enter 0 to exit 1 to continue \n');
     
 end
+
