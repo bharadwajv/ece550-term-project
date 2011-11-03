@@ -2,13 +2,11 @@
 clear all;
 clc;
 %Existing State/Conditions%
-YBUS;
+Ybus_test;
 zs=0.05j;
+ybusn=ybus;
 v=vsp;
 del=Dsp;
-% delp=zeros(1,n-1);
-% delq=zeros(1,n-1);
-ybusn=ybus;
 %indicing the PV and PQ buses%
 for i=1:length(bus(:,1))
     if bus(i,9) 
@@ -93,6 +91,7 @@ qg=zeros(length(bus(:,1)),1);
 tot=1;
 e=1;
 ind=0;
+Iinj=zeros(length(bus(:,1)),1);
 while tot
     fprintf('\n ...Continegency Screening in progress...');
     
@@ -100,6 +99,7 @@ while tot
     f=input('\n From bus number\n');
     t=input('\n To bus number\n');
     ybusn(f,t)=0;
+    ybusn(t,f)=0;
     ybusn(f,f)=ybus(f,f)-inv(r(f,t)+x(f,t)*1i)-0.5*b(f,t);
     ybusn(t,t)=ybus(t,t)-inv(r(t,f)+x(t,f)*1i)-0.5*b(t,f);
 %     while e>=0.01
@@ -142,7 +142,12 @@ while tot
     for i=1:length(pq)
         Il(pq(i))=-conj(Sl(pq(i))/v(pq(i)));
     end
-    Iinj=[nonzeros(I);nonzeros(Il)];
+    for i=1:length(pv)
+        Iinj(i)=I(pv(i));
+    end
+    for i=1:length(pq)
+        Iinj(length(pv)+i)=Il(pq(i));
+    end
     
     Vnew=ybusn\Iinj;
 %     e=min(v-abs(Vnew));
@@ -161,7 +166,20 @@ while tot
 %     disp(del);
 %     ind=ind+1;
 %     end
-    tot=input('\n Enter 0 to exit 1 to continue \n');
+    vn=v;
+    for i=1:length(pv)
+        vn(pv(i))=Vnew(i);
+    end
+    for i=1:length(pq)
+        vn(pq(i))=Vnew(length(pv)+i);
+    end
+    disp(vn)
+    fprintf('\n *=======Bus Information=========*');
+    fprintf('\n BUS | \t VOLTAGE/ANGLE');
+    fprintf('\n *===============================*');
+    for i=1:n
+        fprintf('\n * %d | \t %f / %f *',B(i),abs(vn(i)),angle(vn(i)));
+    end
+     tot=input('\n Enter 0 to exit 1 to continue \n');
     
 end
-
