@@ -1,0 +1,64 @@
+clear all
+clc
+% ybus generation
+Pf4busHw_Ieee;
+%DTSsys_Ieee_rv;
+bus_1=bus;
+
+B=bus(:,1);
+%disp(bus_1);
+brnch_1=brnch;
+vsp=bus(:,5);
+%disp(vsp);
+Dsp=bus(:,6);
+n=max(bus(:,1));
+
+% bus identification
+%pg=bus(:,9);
+%i_pv=find(pg);
+% open the file with write permission
+%fid = fopen('exp.txt', 'w');
+%fprintf(fid, '%f', i_pv);
+%fclose(fid);
+
+% view the contents of the file
+%type exp.txt
+
+% y-bus formation
+frm=brnch(:,1);
+to=brnch(:,2);
+r=zeros(n,n);
+x=zeros(n,n);
+b=zeros(n,n);
+zbus=zeros(n,n);
+ybus=zeros(n,n);
+
+for i=1:1:length(brnch(:,1))
+r(brnch(i,1),brnch(i,2))=brnch(i,7);
+x(brnch(i,1),brnch(i,2))=brnch(i,8);
+b(brnch(i,1),brnch(i,2))=brnch(i,9);
+r(brnch(i,2),brnch(i,1))=brnch(i,7);
+x(brnch(i,2),brnch(i,1))=brnch(i,8);
+b(brnch(i,2),brnch(i,1))=brnch(i,9);
+end
+
+%diagonal elements
+for l=1:n
+    for k=1:length(brnch(:,1))
+        if eq(brnch(k,1),l)|| eq(brnch(k,2),l)
+            ybus(l,l)=ybus(l,l)+inv(brnch(k,7)+brnch(k,8)*1i)+0.5*brnch(k,9);
+        end
+% non diagonal elements
+        if brnch(k,6)
+            ybus(brnch(k,1),brnch(k,2))=-(inv(brnch(k,7)+brnch(k,8)*1i)+0.5*b(brnch(k,1),brnch(k,2))+0.5*b(brnch(k,2),brnch(k,1)))*brnch(k,15);
+            ybus(brnch(k,2),brnch(k,1))=-(inv(brnch(k,7)+brnch(k,8)*1i)+0.5*b(brnch(k,1),brnch(k,2))+0.5*b(brnch(k,2),brnch(k,1)))*brnch(k,15);
+        else
+            ybus(brnch(k,1),brnch(k,2))=-(inv(brnch(k,7)+brnch(k,8)*1i)+0.5*b(brnch(k,1),brnch(k,2))+0.5*b(brnch(k,2),brnch(k,1)));
+            ybus(brnch(k,2),brnch(k,1))=-(inv(brnch(k,7)+brnch(k,8)*1i)+0.5*b(brnch(k,1),brnch(k,2))+0.5*b(brnch(k,2),brnch(k,1)));
+        end
+    end
+end  
+% % open the file with write permission
+% fid = fopen('ybus.txt', 'w');
+% fprintf(fid, '\t %f', ybus);
+% fclose(fid);
