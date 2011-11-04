@@ -132,18 +132,28 @@ while tot
         Sl(pq(i))=pl(pq(i))+ql(pq(i))*1i;
     end
     %current injection calculation%
+%     for i=1:length(pv)
+%         Ig(pv(i))=conj(Sg(pv(i))/v(pv(i)));
+%     end
+%     for i=1:length(pv)
+%         Ef(pv(i))=v(pv(i))+zs*Ig(pv(i));
+%     end
+%     for i=1:length(pv)
+%         I(pv(i))=Ef(pv(i))/zs;
+%     end
     for i=1:length(pv)
-        Ig(pv(i))=conj(Sg(pv(i))/v(pv(i)));
-    end
-    for i=1:length(pv)
-        Ef(pv(i))=v(pv(i))+zs*Ig(pv(i));
-    end
-    for i=1:length(pv)
-        I(pv(i))=Ef(pv(i))/zs;
+        for j= 1:n
+            I(pv(i))=I(pv(i))+ybus(pv(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
+        end
     end
     for i=1:length(pq)
-        Il(pq(i))=-conj(Sl(pq(i))/v(pq(i)));
+        for j= 1:n
+            Il(pq(i))=Il(pq(i))+ybus(pq(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
+        end
     end
+%     for i=1:length(pq)
+%         Il(pq(i))=-conj(Sl(pq(i))/v(pq(i)));
+%     end
     for i=1:length(pv)
         Iinj(i)=I(pv(i));
     end
