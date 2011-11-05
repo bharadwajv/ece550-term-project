@@ -190,11 +190,12 @@ while tot
         end
         disp(vn)
         fprintf('\n *=======Bus Information=========*');
-        fprintf('\n BUS | \t VOLTAGE/ANGLE');
+        fprintf('\n     BUS | \t VOLTAGE/ANGLE');
         fprintf('\n *===============================*');
         for i=1:n
-            fprintf('\n * %d | \t %f / %f *',B(i),abs(vn(i)),angle(vn(i)));
+            fprintf('\n * %2d \t | \t %4.4f / %4.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
         end
+        fprintf('\n *===============================*');
         tot=input('\n Enter 0 to exit 1 to continue \n');
     end
     if ~abs(ybus(f,t))
