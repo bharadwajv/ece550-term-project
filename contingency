@@ -4,7 +4,7 @@ clc;
 %Existing State/Conditions%
 Ybus_test;
 zs=0.05j;
-ybusn=ybus;
+
 v=vsp;
 del=Dsp;
 %indicing the PV and PQ buses%
@@ -90,6 +90,7 @@ qg=bus(:,10)/Sb;
 % Iinj=[nonzeros(Ig);nonzeros(Il)];
 
 %% contingency screening%%
+ybusn=ybus;
 tot=1;
 e=1;
 ind=0;
@@ -100,99 +101,104 @@ while tot
     fprintf('\n Provide the line outage Details');
     f=input('\n From bus number\n');
     t=input('\n To bus number\n');
-    ybusn(f,t)=0;
-    ybusn(t,f)=0;
-    ybusn(f,f)=ybus(f,f)-inv(r(f,t)+x(f,t)*1i)-0.5*b(f,t);
-    ybusn(t,t)=ybus(t,t)-inv(r(t,f)+x(t,f)*1i)-0.5*b(t,f);
-%     while e>=0.01
-    
-    
-    % Nodal analysis %
-%     for i=1:length(pv)
-%         for y=1:n
-%             sigmap=v(pv(i))*v(y)*abs(ybusn(pv(i),y))*cos(angle(ybusn(pv(i),y))+del(y)-del((pv(i))));
-%             sigmaq=-v(pv(i))*v(y)*abs(ybusn(pv(i),y))*sin(angle(ybusn(pv(i),y))+del(y)-del(pv(i)));
-%             pg(pv(i))=pg(pv(i))+sigmap;
-%             qg(pv(i))=qg(pv(i))+sigmaq;
-%         end
-%     end
-%     for i=1:length(pq)
-%         for y=1:n
-%             sigmap=v(pq(i))*v(y)*abs(ybusn(pq(i),y))*cos(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
-%             sigmaq=-v(pq(i))*v(y)*abs(ybusn(pq(i),y))*sin(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
-%             pl(pq(i))=pl(pq(i))+sigmap;
-%             ql(pq(i))=ql(pq(i))+sigmaq;
-%         end
-%     end
+    %check connectivity%
+    if abs(ybus(f,t))
+        ybusn(f,t)=0;
+        ybusn(t,f)=0;
+        ybusn(f,f)=ybus(f,f)-inv(r(f,t)+x(f,t)*1i)-0.5*b(f,t);
+        ybusn(t,t)=ybus(t,t)-inv(r(t,f)+x(t,f)*1i)-0.5*b(t,f);
+    %     while e>=0.01
 
-    for i=1:length(pv)
-        Sg(pv(i))=pg(pv(i))+qg(pv(i))*1i;
-    end
-    for i=1:length(pq)
-        Sl(pq(i))=pl(pq(i))+ql(pq(i))*1i;
-    end
-    %current injection calculation%
-%     for i=1:length(pv)
-%         Ig(pv(i))=conj(Sg(pv(i))/v(pv(i)));
-%     end
-%     for i=1:length(pv)
-%         Ef(pv(i))=v(pv(i))+zs*Ig(pv(i));
-%     end
-%     for i=1:length(pv)
-%         I(pv(i))=Ef(pv(i))/zs;
-%     end
-    for i=1:length(pv)
-        for j= 1:n
-            I(pv(i))=I(pv(i))+ybus(pv(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
+
+        % Nodal analysis %
+    %     for i=1:length(pv)
+    %         for y=1:n
+    %             sigmap=v(pv(i))*v(y)*abs(ybusn(pv(i),y))*cos(angle(ybusn(pv(i),y))+del(y)-del((pv(i))));
+    %             sigmaq=-v(pv(i))*v(y)*abs(ybusn(pv(i),y))*sin(angle(ybusn(pv(i),y))+del(y)-del(pv(i)));
+    %             pg(pv(i))=pg(pv(i))+sigmap;
+    %             qg(pv(i))=qg(pv(i))+sigmaq;
+    %         end
+    %     end
+    %     for i=1:length(pq)
+    %         for y=1:n
+    %             sigmap=v(pq(i))*v(y)*abs(ybusn(pq(i),y))*cos(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
+    %             sigmaq=-v(pq(i))*v(y)*abs(ybusn(pq(i),y))*sin(angle(ybusn(pq(i),y))+del(y)-del(pq(i)));
+    %             pl(pq(i))=pl(pq(i))+sigmap;
+    %             ql(pq(i))=ql(pq(i))+sigmaq;
+    %         end
+    %     end
+
+        for i=1:length(pv)
+            Sg(pv(i))=pg(pv(i))+qg(pv(i))*1i;
         end
-    end
-    for i=1:length(pq)
-        for j= 1:n
-            Il(pq(i))=Il(pq(i))+ybus(pq(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
+        for i=1:length(pq)
+            Sl(pq(i))=pl(pq(i))+ql(pq(i))*1i;
         end
+        %current injection calculation%
+        for i=1:length(pv)
+            Ig(pv(i))=conj(Sg(pv(i))/v(pv(i)));
+        end
+        for i=1:length(pv)
+            Ef(pv(i))=v(pv(i))+zs*Ig(pv(i));
+        end
+        for i=1:length(pv)
+            I(pv(i))=Ef(pv(i))/zs;
+        end
+    %     for i=1:length(pv)
+    %         for j= 1:n
+    %             I(pv(i))=I(pv(i))+ybus(pv(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
+    %         end
+    %     end
+    %     for i=1:length(pq)
+    %         for j= 1:n
+    %             Il(pq(i))=Il(pq(i))+ybus(pq(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
+    %         end
+    %     end
+        for i=1:length(pq)
+            Il(pq(i))=-conj(Sl(pq(i))/v(pq(i)));
+        end
+        for i=1:length(pv)
+            Iinj(i)=I(pv(i));
+        end
+        for i=1:length(pq)
+            Iinj(length(pv)+i)=Il(pq(i));
+        end
+
+        Vnew=ybusn\Iinj;    
+    %     e=min(v-abs(Vnew));
+    %     for i=1:length(pv)
+    %         v(pv(i))=abs(Vnew(i));
+    %         del(pv(i))=angle(Vnew(i));
+    %     end
+    %     for i=1:length(pq)
+    %         v(pq(i))=abs(Vnew(length(pv)+i));
+    %         del(pq(i))=angle(Vnew(length(pv)+i));
+    %     end
+    %     fprintf('ITERATION %f \n',ind);
+        fprintf('\n');
+        disp(Vnew);
+    %     fprintf('\n');
+    %     disp(del);
+    %     ind=ind+1;
+    %     end
+        vn=v;
+        for i=1:length(pv)
+            vn(pv(i))=Vnew(i);
+        end
+        for i=1:length(pq)
+            vn(pq(i))=Vnew(length(pv)+i);
+        end
+        disp(vn)
+        fprintf('\n *=======Bus Information=========*');
+        fprintf('\n BUS | \t VOLTAGE/ANGLE');
+        fprintf('\n *===============================*');
+        for i=1:n
+            fprintf('\n * %d | \t %f / %f *',B(i),abs(vn(i)),angle(vn(i)));
+        end
+        tot=input('\n Enter 0 to exit 1 to continue \n');
     end
-%     for i=1:length(pq)
-%         Il(pq(i))=-conj(Sl(pq(i))/v(pq(i)));
-%     end
-    for i=1:length(pv)
-        Iinj(i)=I(pv(i));
+    if ~abs(ybus(f,t))
+        fprintf('Sorry there exist no connection between bus %d and %d',f,t);
+        tot=input('\n Enter 0 to exit 1 to continue \n');
     end
-    for i=1:length(pq)
-        Iinj(length(pv)+i)=Il(pq(i));
-    end
-    
-    Vnew=ybusn\Iinj;
-%     e=min(v-abs(Vnew));
-%     for i=1:length(pv)
-%         v(pv(i))=abs(Vnew(i));
-%         del(pv(i))=angle(Vnew(i));
-%     end
-%     for i=1:length(pq)
-%         v(pq(i))=abs(Vnew(length(pv)+i));
-%         del(pq(i))=angle(Vnew(length(pv)+i));
-%     end
-%     fprintf('ITERATION %f \n',ind);
-    fprintf('\n');
-    disp(Vnew);
-%     fprintf('\n');
-%     disp(del);
-%     ind=ind+1;
-%     end
-    vn=v;
-    for i=1:length(pv)
-        vn(pv(i))=Vnew(i);
-    end
-    for i=1:length(pq)
-        vn(pq(i))=Vnew(length(pv)+i);
-    end
-    disp(vn)
-    fprintf('\n *=======Bus Information=========*');
-    fprintf('\n BUS | \t VOLTAGE/ANGLE');
-    fprintf('\n *===============================*');
-    for i=1:n
-        fprintf('\n * %d | \t %f / %f *',B(i),abs(vn(i)),angle(vn(i)));
-    end
-     tot=input('\n Enter 0 to exit 1 to continue \n');
-    
 end
-
