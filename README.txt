@@ -1,4 +1,7 @@
 
+
+
+
 % nodal analysis%
 Create Y bus
 Find Gen Bus
@@ -8,6 +11,15 @@ take contingency
 create new ybus
 perform nodal analysis.
 output the voltages and angles
+
+critical buses
+bus 3 - 5, 3 - 6, 3 - 5, 14 - 15 
+
+
+
+
+
+
 
 
 

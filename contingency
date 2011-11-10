@@ -214,6 +214,10 @@ while tot
             fprintf('\n * %2d \t | \t %4.4f / %4.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
         end
         fprintf('\n *===============================*');
+        if det(ybusn)==0
+            fprintf('\n WARNING : SYSTEM BLACKOUT');
+            fprintf('\n Critical Link:Bus %d to %d out!!',f,t);
+        end
         tot=input('\n Enter 0 to exit 1 to continue \n');
     end
     if ~abs(ybus(f,t))
