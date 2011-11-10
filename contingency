@@ -95,6 +95,13 @@ tot=1;
 e=1;
 ind=0;
 Iinj=zeros(length(bus(:,1)),1);
+
+% Version 2.3 inclusion
+% current injection calculation
+for i=1:num_bus
+    v_angle(i)=v(i)*(cos(del(i))+1i*sin(del(i)));
+end
+Iinj=ybus*v_angle';
 while tot
     fprintf('\n ...Continegency Screening in progress...');
     
@@ -102,14 +109,14 @@ while tot
     f=input('\n From bus number\n');
 
 % Version 2.3 inclusion
-%     for i=1:length(brnch(:,1))
-%         if brnch(i,1)==f
-%             fprintf('\n bus %d is connected to %d',f,brnch(i,2));
-%         end
-%         if brnch(i,2)==f
-%             fprintf('\n bus %d is connected to %d',f,brnch(i,1));
-%         end
-%     end
+    for i=1:length(brnch(:,1))
+        if brnch(i,1)==f
+            fprintf('\n bus %d is connected to %d',f,brnch(i,2));
+        end
+        if brnch(i,2)==f
+            fprintf('\n bus %d is connected to %d',f,brnch(i,1));
+        end
+    end
     t=input('\n To bus number\n');
     %check connectivity%
     if abs(ybus(f,t))
@@ -145,15 +152,16 @@ while tot
             Sl(pq(i))=pl(pq(i))+ql(pq(i))*1i;
         end
         %current injection calculation%
-        for i=1:length(pv)
-            Ig(pv(i))=conj(Sg(pv(i))/(v(pv(i))*(cos(del(pv(i)))+1i*sin(del(pv(i)))))); % Version 2.3 inclusion
-        end
-        for i=1:length(pv)
-            Ef(pv(i))=(v(pv(i))*(cos(del(pv(i)))+1i*sin(del(pv(i)))))+zs*Ig(pv(i)); % Version 2.3 inclusion
-        end
-        for i=1:length(pv)
-            I(pv(i))=Ef(pv(i))/zs;
-        end
+
+%         for i=1:length(pv)
+%             Ig(pv(i))=conj(Sg(pv(i))/(v(pv(i))*(cos(del(pv(i)))+1i*sin(del(pv(i)))))); % Version 2.3 inclusion
+%         end
+%         for i=1:length(pv)
+%             Ef(pv(i))=(v(pv(i))*(cos(del(pv(i)))+1i*sin(del(pv(i)))))+zs*Ig(pv(i)); % Version 2.3 inclusion
+%         end
+%         for i=1:length(pv)
+%             I(pv(i))=Ef(pv(i))/zs;
+%         end
     %     for i=1:length(pv)
     %         for j= 1:n
     %             I(pv(i))=I(pv(i))+ybus(pv(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
@@ -164,15 +172,15 @@ while tot
     %             Il(pq(i))=Il(pq(i))+ybus(pq(i),j)*v(j)*(cos(del(j))+1j*sin(del(j)));
     %         end
     %     end
-        for i=1:length(pq)
-            Il(pq(i))=-conj(Sl(pq(i))/(v(pq(i))*(cos(del(pq(i)))+1i*sin(del(pq(i)))))); % Version 2.3 inclusion
-        end
-        for i=1:length(pv)
-            Iinj(i)=I(pv(i));
-        end
-        for i=1:length(pq)
-            Iinj(length(pv)+i)=Il(pq(i));
-        end
+%         for i=1:length(pq)
+%             Il(pq(i))=-conj(Sl(pq(i))/(v(pq(i))*(cos(del(pq(i)))+1i*sin(del(pq(i)))))); % Version 2.3 inclusion
+%         end
+%         for i=1:length(pv)
+%             Iinj(i)=I(pv(i));
+%         end
+%         for i=1:length(pq)
+%             Iinj(length(pv)+i)=Il(pq(i));
+%         end
 
         Vnew=inv(ybusn)*Iinj;    % Version 2.3 inclusion
     %     e=min(v-abs(Vnew));
