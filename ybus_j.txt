@@ -1,0 +1,57 @@
+
+%Execute inpt.m file to read in input data in IEEE Format
+%Pf4busHw_Ieee;
+DTSsys_Ieee_rv;
+%Get System data from input file
+num_bus=max(bus(:,1));
+bus_type=bus(:,4);
+bus_Vsol=bus(:,5);
+bus_angle_deg=bus(:,6);
+bus_angle_rad=(pi/180).*bus_angle_deg;
+
+B=bus(:,1);
+vsp=bus(:,5);
+frm=brnch(:,1);
+to=brnch(:,2);
+r=zeros(num_bus,num_bus);
+x=zeros(num_bus,num_bus);
+b=zeros(num_bus,num_bus);
+for i=1:1:length(brnch(:,1))
+    r(brnch(i,1),brnch(i,2))=brnch(i,7);
+    x(brnch(i,1),brnch(i,2))=brnch(i,8);
+    b(brnch(i,1),brnch(i,2))=brnch(i,9);
+    r(brnch(i,2),brnch(i,1))=brnch(i,7);
+    x(brnch(i,2),brnch(i,1))=brnch(i,8);
+    b(brnch(i,2),brnch(i,1))=brnch(i,9);
+end
+
+%Construct Ybus
+%initialize Ybus
+for n=1:num_bus
+    for p=1:num_bus
+        Y(n,p)=0;
+    end
+end
+
+
+for n=1:length(brnch(:,1))
+    for p=1:num_bus
+    %calculate diagonal elements first
+        if brnch(n,1)==p || brnch(n,2)==p
+            
+                Y(p,p)=Y(p,p)+inv(brnch(n,7)+j*brnch(n,8))+0.5*(brnch(n,9));
+           
+        end
+    end
+    %next calculate off-diagonal elements    
+
+        yt=-inv(brnch(n,7)+j.*brnch(n,8));
+        
+        Y(brnch(n,1),brnch(n,2))=Y(brnch(n,1),brnch(n,2))+yt;
+    
+end
+for n=1:length(brnch(:,1))
+    Y(brnch(n,2),brnch(n,1))=Y(brnch(n,1),brnch(n,2));
+end
+
+ybus=Y;
