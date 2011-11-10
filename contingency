@@ -95,6 +95,7 @@ tot=1;
 e=1;
 ind=0;
 Iinj=zeros(length(bus(:,1)),1);
+vn=zeros(length(bus(:,1)),1);
 
 % Version 2.3 inclusion
 % current injection calculation
@@ -106,7 +107,12 @@ while tot
     fprintf('\n ...Continegency Screening in progress...');
     
     fprintf('\n Provide the line outage Details');
+    
     f=input('\n From bus number\n');
+    if isempty(f)
+        fprintf('\n kindly enter a valid bus number');
+        f=input('\n From bus number\n');
+    end
 
 % Version 2.3 inclusion
     for i=1:length(brnch(:,1))
@@ -118,6 +124,10 @@ while tot
         end
     end
     t=input('\n To bus number\n');
+    if isempty(t)
+        fprintf('\n kindly enter a valid bus number');
+        t=input('\n To bus number\n');
+    end
     %check connectivity%
     if abs(ybus(f,t))
         ybusn(f,t)=0;
@@ -194,24 +204,29 @@ while tot
     %     end
     %     fprintf('ITERATION %f \n',ind);
         fprintf('\n');
-        disp(Vnew);
+    %    disp(Vnew);
     %     fprintf('\n');
     %     disp(del);
     %     ind=ind+1;
     %     end
-        vn=[];
-        for i=1:length(pv)
-            vn(pv(i))=Vnew(i);
+        vn=Vnew;
+%         for i=1:length(pv)
+%             vn(pv(i))=Vnew(i);
+%         end
+%         for i=1:length(pq)
+%             vn(pq(i))=Vnew(length(pv)+i);
+%         end
+%        disp(vn)
+        % Version 2.3 inclusion
+        if det(ybusn)==0
+            fprintf('\n WARNING : SYSTEM BLACKOUT');
+            fprintf('\n Critical Link:Bus %d to %d out!!',f,t);
         end
-        for i=1:length(pq)
-            vn(pq(i))=Vnew(length(pv)+i);
-        end
-        disp(vn)
         fprintf('\n *=======Bus Information=========*');
         fprintf('\n \t BUS | \t VOLTAGE/ANGLE');
         fprintf('\n *===============================*');
         for i=1:num_bus
-            fprintf('\n * %2d \t | \t %4.4f / %4.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
+            fprintf('\n * %2d \t | \t %2.4f / %3.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
         end
         fprintf('\n *===============================*');
         if det(ybusn)==0
@@ -224,4 +239,43 @@ while tot
         fprintf('Sorry there exist no connection between bus %d and %d',f,t);
         tot=input('\n Enter 0 to exit 1 to continue \n');
     end
+    fid=fopen('output.m','w');
+    fprintf(fid,'\n');
+    % Version 2.3 inclusion
+    if det(ybusn)==0
+       fprintf(fid,'\n WARNING : SYSTEM BLACKOUT');
+       fprintf(fid,'\n Critical Link:Bus %d to %d out!!',f,t);
+    end
+    fprintf(fid,'\n *=======Bus Information=========*');
+    fprintf(fid,'\n \t BUS | \t VOLTAGE/ANGLE');
+    fprintf(fid,'\n *===============================*');
+    for i=1:num_bus
+        fprintf(fid,'\n * %2d \t | \t %2f / %3f \t *',B(i),abs(vn(i)),angle(vn(i)));
+    end
+    fprintf(fid,'\n *===============================*');
+    if abs(vn(i))<0.95 || abs(vn(i))> 1.05
+        fprintf(fid,'\n ALERT: Bus %d is outside voltage regulation limits.  ACTION NEEDED!', i);
+    else
+        fprintf(fid,'\n There are no bus voltage violations.');
+    end
+    fprintf(fid,'\n *===============================*');
+    ovrld=0;
+    for i=1:length(brnch(:,1))
+        a=brnch(i,1);
+        b=brnch(i,2);
+        v=max(vn(a),vn(b));
+        curr=abs(abs(vn(a)-abs(vn(b))))*Y(a,b)+vn(a)*B(a)+B(b)*brnch(i,9);
+        S=v*conj(curr);
+        if (brnch(i,10))
+            if (S > brnch(i,11)) || (S > brnch(i,12))
+                fprintf(fid,'\n ALERT: The line from bus %d to %d is overloaded. ACTION NEEDED!',a,b);
+                ovrld=ovrld+1;
+            end
+        end
+    end
+    if ovrld==0
+            fprintf(fid,'\n There are no lines overloaded.');
+    end
+    fprintf(fid,'\n *===============================*');
+    
 end
