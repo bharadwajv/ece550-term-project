@@ -7,7 +7,7 @@ num_bus=max(bus(:,1));
 bus_type=bus(:,4);
 bus_Vsol=bus(:,5);
 bus_angle_deg=bus(:,6);
-bus_angle_rad=(pi/180).*bus_angle_deg;
+bus_angle_rad=(pi()/180).*bus_angle_deg;
 
 B=bus(:,1);
 vsp=bus(:,5);
@@ -39,13 +39,13 @@ for n=1:length(brnch(:,1))
     %calculate diagonal elements first
         if brnch(n,1)==p || brnch(n,2)==p
             
-                Y(p,p)=Y(p,p)+inv(brnch(n,7)+j*brnch(n,8))+0.5*(brnch(n,9));
+                Y(p,p)=Y(p,p)+inv(brnch(n,7)+1j*brnch(n,8))+0.5*1j*(brnch(n,9));
            
         end
     end
     %next calculate off-diagonal elements    
 
-        yt=-inv(brnch(n,7)+j.*brnch(n,8));
+        yt=-inv(brnch(n,7)+1j*brnch(n,8));
         
         Y(brnch(n,1),brnch(n,2))=Y(brnch(n,1),brnch(n,2))+yt;
     
