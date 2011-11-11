@@ -146,31 +146,29 @@ while tot
                 fprintf(fid,'\n There are no bus voltage violations.');
         end
         
-        if min(abs(vn))<0.95
+
             fprintf(fid,'\n ALERT: UNDERVOLTAGE CONDITION.  Following Buses are below voltage regulation limit.  ACTION NEEDED!');
             fprintf(fid,'\n *=====Bus Information=====*');
             fprintf(fid,'\n \t BUS | \t VOLTAGE');
             fprintf(fid,'\n *=========================*');
             for i= 1:length(vn)           
                 if abs(vn(i))< 0.95
-                    fprintf(fid,'\n * %2d \t | \t %2.4f \t *',B(i),vn(i));
+                    fprintf(fid,'\n * %2d \t | \t %2.4f \t *',B(i),abs(vn(i)));
                 end
             end
-        end
-        fprintf(fid,'\n *=========================* \n');
-        
-        if max(abs(vn))> 1.05
+
+        fprintf(fid,'\n *=========================* \n');     
+     
             fprintf(fid,'\n ALERT: OVERVOLTAGE CONDITION.  Following Buses are above voltage regulation limit.  ACTION NEEDED!');
             fprintf(fid,'\n *=====Bus Information=====*');
             fprintf(fid,'\n \t BUS | \t VOLTAGE');
             fprintf(fid,'\n *=========================*');
             for i= 1:length(vn)
                 if abs(vn(i))> 1.05
-
-                    fprintf(fid,'\n * %2d \t | \t %2.4f \t *',B(i),vn(i));
+                    fprintf(fid,'\n * %2d \t | \t %2.4f \t *',B(i),abs(vn(i)));
                 end                     
             end
-        end
+        
         fprintf(fid,'\n *=========================* \n');
         
         ovrld=0;
@@ -190,8 +188,8 @@ while tot
             %Qab=vn(a)*(-vn(a)*(imag(brnch(i,9))+imag(Y(a,b)))-vn(b)*(real(Y(a,b))*(sin(angle(vn(a))-angle(vn(b)))+imag(Y(a,b))*cos(angle(vn(a))-angle(vn(b))))));
             %Sab=Pab+j*Qab;
             %METHOD 3
-            Pab=vn(ax)*(vn(bx)*(real(Y(ax,bx))*cos(angle(vn(ax))-angle(vn(bx)))+imag(Y(ax,bx))*sin(angle(vn(ax))-angle(vn(bx)))));
-            Qab=vn(ax)*(vn(bx)*(real(Y(ax,bx))*sin(angle(vn(ax))-angle(vn(bx)))-imag(Y(ax,bx))*cos(angle(vn(ax))-angle(vn(bx)))));
+            Pab=abs(vn(ax))*(abs(vn(ax))*(real(0.5*b(ax,bx))+real(ybusn(ax,bx)))-(abs(vn(bx))*(real(ybusn(ax,bx))*cos(angle(vn(ax))-angle(vn(bx)))+imag(ybusn(ax,bx))*sin(angle(vn(ax))-angle(vn(bx))))));
+            Qab=abs(vn(ax))*(-abs(vn(ax))*(imag(0.5*b(ax,bx))+imag(ybusn(ax,bx)))-(abs(vn(bx))*(real(ybusn(ax,bx))*sin(angle(vn(ax))-angle(vn(bx)))-imag(ybusn(ax,bx))*cos(angle(vn(ax))-angle(vn(bx))))));
             Sab=Pab+j*Qab;
             
             if (brnch(i,10))                
