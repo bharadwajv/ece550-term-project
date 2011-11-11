@@ -51,7 +51,7 @@ ybusn=ybus;
 tot=1;
 Iinj=zeros(length(bus(:,1)),1);
 vn=zeros(length(bus(:,1)),1);
-
+fid=fopen('output.m','w');
 % Version 2.3 inclusion
 % current injection calculation
 for i=1:num_bus
@@ -125,8 +125,8 @@ while tot
         fprintf('Sorry there exist no connection between bus %d and %d',f,t);
         tot=input('\n Enter 0 to exit 1 to continue \n');
     end
-    fid=fopen('output.m','w');
-    fprintf(fid,'\n');
+    
+    
     % Version 2.3 inclusion
     if det(ybusn)==0      
        fprintf(fid,'\n WARNING : COMPLETE SYSTEM BLACKOUT');
@@ -135,10 +135,10 @@ while tot
     fprintf(fid,'\n CONTINGENCY SCREENING ANALYSIS REPORT \n');
     fprintf(fid,'\n LINE OUTAGE CONDITION BETWEEN BUS %d AND %d \n',f,t);
     if clk(4)<12
-        fprintf(fid,'\n date: %d / %d / %d \t \t Time: %d:%d AM',clk(2),clk(3),clk(1),clk(4),clk(5));
+        fprintf(fid,'\n date: %d / %d / %d \t \t Time: %2d:%2d AM',clk(2),clk(3),clk(1),clk(4),clk(5));
     end
     if clk(4)>=12
-        fprintf(fid,'\n date: %d / %d / %d \t \t Time: %d:%d PM',clk(2),clk(3),clk(1),clk(4),clk(5));
+        fprintf(fid,'\n date: %d / %d / %d \t \t Time: %2d:%2d PM',clk(2),clk(3),clk(1),clk(4),clk(5));
     end
         if abs(det(ybusn))
         fprintf(fid,'\n \n SYSTEM HEALTHINESS REPORT');    
@@ -174,12 +174,13 @@ while tot
         fprintf(fid,'\n *=========================* \n');
         
         ovrld=0;
-        fprintf(fid,'\n *=========================*');
+        
         
         fprintf(fid,'\n ALERT: The line from following buses are OVERLOADED. ACTION NEEDED!');
+        fprintf(fid,'\n *=========================*');
         for i=1:length(brnch(:,1))
-            a=brnch(i,1);
-            b=brnch(i,2);
+            ax=brnch(i,1);
+            bx=brnch(i,2);
             %METHOD 1
             %v=max(vn(a),vn(b));
             %curr=abs(abs(vn(a)-abs(vn(b))))*Y(a,b)+vn(a)*imag(Y(a,a))+imag(Y(b,b))*brnch(i,9);
@@ -189,13 +190,13 @@ while tot
             %Qab=vn(a)*(-vn(a)*(imag(brnch(i,9))+imag(Y(a,b)))-vn(b)*(real(Y(a,b))*(sin(angle(vn(a))-angle(vn(b)))+imag(Y(a,b))*cos(angle(vn(a))-angle(vn(b))))));
             %Sab=Pab+j*Qab;
             %METHOD 3
-            Pab=vn(a)*(vn(b)*(real(Y(a,b))*cos(angle(vn(a))-angle(vn(b)))+imag(Y(a,b))*sin(angle(vn(a))-angle(vn(b)))));
-            Qab=vn(a)*(vn(b)*(real(Y(a,b))*sin(angle(vn(a))-angle(vn(b)))-imag(Y(a,b))*cos(angle(vn(a))-angle(vn(b)))));
+            Pab=vn(ax)*(vn(bx)*(real(Y(ax,bx))*cos(angle(vn(ax))-angle(vn(bx)))+imag(Y(ax,bx))*sin(angle(vn(ax))-angle(vn(bx)))));
+            Qab=vn(ax)*(vn(bx)*(real(Y(ax,bx))*sin(angle(vn(ax))-angle(vn(bx)))-imag(Y(ax,bx))*cos(angle(vn(ax))-angle(vn(bx)))));
             Sab=Pab+j*Qab;
             
             if (brnch(i,10))                
                 if (abs(Sab) > brnch(i,11)) || (abs(Sab) > brnch(i,12))
-                    fprintf(fid,'\n %d to %d',a,b);
+                    fprintf(fid,'\n %d to %d',ax,bx);
                     ovrld=ovrld+1;
                 end
             end
@@ -213,6 +214,7 @@ while tot
     for i=1:num_bus
         fprintf(fid,'\n * %2d \t | \t %2.4f / %3.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
     end
-    fprintf(fid,'\n *===============================*');
+    fprintf(fid,'\n *===============================* \n \n');
 end
+fclose(fid);
     
