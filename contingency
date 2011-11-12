@@ -177,23 +177,29 @@ while tot
         fprintf(fid,'\n ALERT: The line from following buses are OVERLOADED. ACTION NEEDED!');
         fprintf(fid,'\n *=========================*');
         for i=1:length(brnch(:,1))
-            ax=brnch(i,1);
-            bx=brnch(i,2);
+            if brnch(i,1)>brnch(i,2)
+                ax=brnch(i,1);
+                bx=brnch(i,2);
+            end
+            if brnch(i,1)<brnch(i,2)
+                bx=brnch(i,1);
+                ax=brnch(i,2);
+            end
             %METHOD 1
-            %v=max(vn(a),vn(b));
-            %curr=abs(abs(vn(a)-abs(vn(b))))*Y(a,b)+vn(a)*imag(Y(a,a))+imag(Y(b,b))*brnch(i,9);
+            %v=max(vn(ax),vn(bx));
+            %curr=abs(abs(vn(ax)-abs(vn(bx))))*ybusn(ax,bx)+vn(ax)*imag(ybusn(ax,ax))+imag(ybusn(bx,bx))*brnch(i,9);
             %Sab=v*conj(curr);
             %METHOD 2
-            %Pab=vn(a)*(vn(a)*(real(brnch(i,9))+real(Y(a,b)))-vn(b)*(real(Y(a,b))*(cos(angle(vn(a))-angle(vn(b)))+imag(Y(a,b))*sin(angle(vn(a))-angle(vn(b))))));
-            %Qab=vn(a)*(-vn(a)*(imag(brnch(i,9))+imag(Y(a,b)))-vn(b)*(real(Y(a,b))*(sin(angle(vn(a))-angle(vn(b)))+imag(Y(a,b))*cos(angle(vn(a))-angle(vn(b))))));
+            %Pab=abs(vn(ax))*(abs(vn(ax))*(real(brnch(i,9))+real(ybusn(ax,bx)))-abs(vn(bx))*(real(ybusn(ax,bx))*(cos(angle(vn(ax))-angle(vn(bx)))+imag(ybusn(ax,bx))*sin(angle(vn(ax))-angle(vn(bx))))));
+            %Qab=abs(vn(ax))*(-abs(vn(ax))*(imag(brnch(i,9))+imag(ybusn(ax,bx)))-abs(vn(bx))*(real(ybusn(ax,bx))*(sin(angle(vn(ax))-angle(vn(bx)))+imag(ybusn(ax,bx))*cos(angle(vn(ax))-angle(vn(bx))))));
             %Sab=Pab+j*Qab;
             %METHOD 3
             Pab=abs(vn(ax))*(abs(vn(ax))*(real(0.5*b(ax,bx))+real(ybusn(ax,bx)))-(abs(vn(bx))*(real(ybusn(ax,bx))*cos(angle(vn(ax))-angle(vn(bx)))+imag(ybusn(ax,bx))*sin(angle(vn(ax))-angle(vn(bx))))));
             Qab=abs(vn(ax))*(-abs(vn(ax))*(imag(0.5*b(ax,bx))+imag(ybusn(ax,bx)))-(abs(vn(bx))*(real(ybusn(ax,bx))*sin(angle(vn(ax))-angle(vn(bx)))-imag(ybusn(ax,bx))*cos(angle(vn(ax))-angle(vn(bx))))));
-            Sab=Pab+j*Qab;
+            Sab(i)=Pab+j*Qab;
             
             if (brnch(i,10))                
-                if (abs(Sab) > brnch(i,11)) || (abs(Sab) > brnch(i,12))
+                if (abs(Sab(i))*Sb > brnch(i,11)) || (abs(Sab(i))*Sb > brnch(i,12))
                     fprintf(fid,'\n %d to %d',ax,bx);
                     ovrld=ovrld+1;
                 end
