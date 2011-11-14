@@ -112,7 +112,7 @@ while tot
         fprintf('\n \t BUS | \t VOLTAGE/ANGLE');
         fprintf('\n *=========================*');
         for i=1:num_bus
-            fprintf('\n * %2d \t | \t %2.4f / %3.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
+            fprintf('\n * %2d \t | \t %2.4f / %3.4f \t*',B(i),abs(vn(i)),angle(vn(i)));
         end
         fprintf('\n *=========================*');
         if det(ybusn)==0            
@@ -148,34 +148,34 @@ while tot
         
 
             fprintf(fid,'\n ALERT: UNDERVOLTAGE CONDITION.  Following Buses are below voltage regulation limit.  ACTION NEEDED!');
-            fprintf(fid,'\n *=====Bus Information=====*');
+            fprintf(fid,'\n *====Bus Information====*');
             fprintf(fid,'\n \t BUS | \t VOLTAGE');
-            fprintf(fid,'\n *=========================*');
+            fprintf(fid,'\n *=======================*');
             for i= 1:length(vn)           
                 if abs(vn(i))< 0.95
-                    fprintf(fid,'\n * %2d \t | \t %2.4f \t *',B(i),abs(vn(i)));
+                    fprintf(fid,'\n * %2d \t | \t %2.4f \t*',B(i),abs(vn(i)));
                 end
             end
 
-        fprintf(fid,'\n *=========================* \n');     
+        fprintf(fid,'\n *=======================* \n');     
      
             fprintf(fid,'\n ALERT: OVERVOLTAGE CONDITION.  Following Buses are above voltage regulation limit.  ACTION NEEDED!');
-            fprintf(fid,'\n *=====Bus Information=====*');
+            fprintf(fid,'\n *====Bus Information====*');
             fprintf(fid,'\n \t BUS | \t VOLTAGE');
-            fprintf(fid,'\n *=========================*');
+            fprintf(fid,'\n *=======================*');
             for i= 1:length(vn)
                 if abs(vn(i))> 1.05
-                    fprintf(fid,'\n * %2d \t | \t %2.4f \t *',B(i),abs(vn(i)));
+                    fprintf(fid,'\n * %2d \t | \t %2.4f \t*',B(i),abs(vn(i)));
                 end                     
             end
         
-        fprintf(fid,'\n *=========================* \n');
+        fprintf(fid,'\n *=======================* \n');
         
         ovrld=0;
         
         
         fprintf(fid,'\n ALERT: The line from following buses are OVERLOADED. ACTION NEEDED!');
-        fprintf(fid,'\n *=========================*');
+        fprintf(fid,'\n *=======================*');
         for i=1:length(brnch(:,1))
             if brnch(i,1)>brnch(i,2)
                 ax=brnch(i,1);
@@ -208,17 +208,17 @@ while tot
         if ovrld==0
                 fprintf(fid,'\n There are NO lines OVERLOADED.');
         end
-            fprintf(fid,'\n *=========================* \n');
+            fprintf(fid,'\n *=======================* \n');
         end
     
     fprintf(fid,'\n OVERALL SYSTEM DATA');
-    fprintf(fid,'\n *=======Bus Information=========*');
+    fprintf(fid,'\n *=======Bus Information========*');
     fprintf(fid,'\n \t BUS | \t VOLTAGE/ANGLE');
-    fprintf(fid,'\n *===============================*');
+    fprintf(fid,'\n *==============================*');
     for i=1:num_bus
-        fprintf(fid,'\n * %2d \t | \t %2.4f / %3.4f \t *',B(i),abs(vn(i)),angle(vn(i)));
+        fprintf(fid,'\n * %2d \t | \t %2.4f / %3.4f \t*',B(i),abs(vn(i)),angle(vn(i)));
     end
-    fprintf(fid,'\n *===============================* \n \n');
+    fprintf(fid,'\n *==============================* \n \n');
 end
 fclose(fid);
     
