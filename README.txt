@@ -1,34 +1,7 @@
-
-
-
-
-% nodal analysis%
-Create Y bus
-Find Gen Bus
-FindIg for Gen bus
-find Il for load bus
-take contingency
-create new ybus
-perform nodal analysis.
-output the voltages and angles
-
-critical buses
-bus 3 - 5, 3 - 6, 3 - 5, 14 - 15 
-
-
-
-
-
-
-
-
-
-Read the data from the load bus data and create the ybus
-Generate a output file with the ybus alone 
-Check with power flow
-Newton Raphson method
-Do nodal analysis
-
-find the current injections
-use the y bus file to start the problem
-generate the output file
+The Version 2.8 has the following features
+- the code has been generated for performing the contingency line outage analysis of a generic power system.
+- It takes input in the form of IEEE std power system data.
+- The software automatically generates the current systems ybus.
+- To perform the contingency, you are required to provide the bus details between which you would like to perform a line outage.
+- To ease the user, upon providing the 'from bus' details, you will be shown all the available branches for the current selection.
+- Upon providing the 'To bus' details, the code generates an output file of all the contingency conditions along with the time stamping.
