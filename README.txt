@@ -1,5 +1,5 @@
 The Version 2.8 has the following features
-- the code has been generated for performing the contingency line outage analysis of a generic power system.
+- The code has been generated for performing the contingency line outage analysis of a generic power system.
 - It takes input in the form of IEEE std power system data.
 - The software automatically generates the current systems ybus.
 - To perform the contingency, you are required to provide the bus details between which you would like to perform a line outage.
